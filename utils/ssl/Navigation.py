@@ -46,7 +46,7 @@ class Navigation:
     robot_angle = Navigation.degrees_to_radians(Geometry.normalize_angle(robot.theta, 0, 180))
 
     max_velocity = MAX_VELOCITY
-    distance_to_target = robot_position.dist_to(target)
+    distance_to_target = robot_position.dist_to(target)    
     kp = ANGLE_KP
 
     # Use proportional speed to decelerate when getting close to desired target
