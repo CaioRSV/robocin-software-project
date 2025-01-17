@@ -5,70 +5,58 @@ from utils.Geometry import Geometry
 
 
 class ExampleAgent(BaseAgent):
-    def __init__(self, id=0, yellow=False, rbtRadius=None):
+    def __init__(self, id=0, yellow=False, field=None):
         super().__init__(id, yellow)
-        self.rbtRadius = rbtRadius
+        self.field = field
+        self.steps = 0;
+    
+        self.nodes = [];
+        self.priorityQueue = [];
+        self.visitedNodes = [];
+
 
     def decision(self):
         if len(self.targets) == 0:
             return
         
-        # for i in self.opponents:
-        #     if(i==1):
-        #         print(self.opponents[i])
-        #         print("")
-        #         print('--')
-    
-        # for i in self.teammates:
-        #     if(self.teammates[i].id != self.id):
-        #         print(self.teammates[i])
-        #         print(self.id)
-        #         print("")
-        #         print('--')
-
-        # list = []
-
-        # for i in range(self.targets):
-        #     res = Navigation.goToPoint(self.robot, self.targets[i])
-        #     list.append(res)
-
-        # print(list)
-
         # Chosing closest target to follow at the moment
         targetDistances = [[self.pos.dist_to(self.targets[i]), self.targets[i]] for i in range(len(self.targets))]
         targetDistances.sort(key=(lambda x: x[0]))
         
         chosenPoint = targetDistances[0][1]
 
-        # Finding the best path (But with same costs for each step in directions)
+        nodes = []
 
-        d = self.rbtRadius * 5 # stepSize
+        gap = self.field.rbt_radius  # Gap arbitrário (para testar, 1 é bom de visualizar)
 
-        # Different possible directions [X,Y]
-        directions = [
-            [0, d], # ↑
-            [d, d], # ↗
-            [d, 0], # →
-            [d, -d], # ↘
-            [0, -d], # ↓
-            [-d, -d], # ↙
-            [-d, 0], # ←
-            [-d, d], # ↑
-        ]
-        
-        # Possible new destinations
-        pointStepPositions = list(map(lambda item: Point(item[0]+chosenPoint[0], item[1]+chosenPoint[1]), directions))
+        height = self.field.length  # For example, 4.0
+        width = self.field.width    # For example, 6.0
 
-        # Sort by distance to the chosenTarget
-        pointStepPositions.sort(key=(
-            lambda item: item.dist_to(chosenPoint)
-        ))
+        # Bordas
+        min_y = -height / 2
+        max_y = height / 2
+        min_x = -width / 2
+        max_x = width / 2
 
-        # print('-----------')
-        # print(self.pos)
-        # print(chosenPoint)
+        y = min_y
+        while y <= max_y:
+            x = min_x
+            while x <= max_x:
+                nodes.append(Point(x, y))
+                x += gap
+            y += gap
 
-        target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, pointStepPositions[0])
+        print('-------');
+        print(len(nodes));
+        # Applying A*
+
+        # if(self.steps < 25):
+        #     self.steps += 1
+        # else:
+        #     print(self.steps)
+        #     self.steps = 0        
+
+        target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, chosenPoint)
         self.set_vel(target_velocity)
         self.set_angle_vel(target_angle_velocity)
 

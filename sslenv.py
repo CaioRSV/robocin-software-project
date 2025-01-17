@@ -38,7 +38,7 @@ class SSLExampleEnv(SSLBaseEnv):
         self.targets_per_round = 1
 
 
-        self.my_agents = {0: ExampleAgent(0, False, self.field.rbt_radius)}
+        self.my_agents = {0: ExampleAgent(0, False, self.field)}
         self.blue_agents = {i: RandomAgent(i, False) for i in range(1, 11)}
         self.yellow_agents = {i: RandomAgent(i, True) for i in range(0, 11)}
 
