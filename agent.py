@@ -75,9 +75,9 @@ class ExampleAgent(BaseAgent):
 
         self.priorityQueue.append(currentNode) # Point, f(0), Parent
 
-        print(f"Pos: {planePos} | Target: {targetPos}")
+        #print(f"Pos: {planePos} | Target: {targetPos}")
 
-        def RecursiveStep(currentNode, targetNode):
+        def RecursiveStep(currentNode, targetNode, depth):
             if(len(self.priorityQueue) == 0): 
                 print('PRIORITY QUEUE VAZIA')
                 return
@@ -99,7 +99,7 @@ class ExampleAgent(BaseAgent):
             # print(f"Posição no plano de nodes: {currentNode[0]}")
                     
             # Popping currentNode from the Priority Queue
-            self.priorityQueue = [i for i in self.priorityQueue if i!=currentNode]
+            self.priorityQueue = [i for i in self.priorityQueue if i!=currentNode[0]]
 
             # Visited Nodes Handling
             newVisitedNodes = []
@@ -121,7 +121,7 @@ class ExampleAgent(BaseAgent):
                 for n in self.nodes:
                     if (i[0].x == n.x and i[0].y == n.y):
                         curPoint = Point(n.x, n.y)
-                        neighbourNodes.append([curPoint, curPoint.dist_to(targetNode[0]), currentNode])
+                        neighbourNodes.append([curPoint, curPoint.dist_to(targetNode[0]), currentNode[0]])
             
             for i in neighbourNodes:
                 self.priorityQueue.append(i)
@@ -130,15 +130,18 @@ class ExampleAgent(BaseAgent):
             nextNode = min(self.priorityQueue, key= lambda x: x[1])
 
             # Target checking
-            if(nextNode[0] == targetNode[0]):
+            if(nextNode[0] == targetNode[0] or depth>20):
                 self.visitedNodes.append(nextNode)
+                print("RESULTs:")
+                #print(self.priorityQueue)
+                print(self.visitedNodes)
                 return nextNode
             else:
-                RecursiveStep(nextNode, targetNode)
+                RecursiveStep(nextNode, targetNode, depth+1)
 
         if (self.steps < 1) :
             print(len(self.priorityQueue))
-            print(RecursiveStep(currentNode, targetNode))
+            print(RecursiveStep(currentNode, targetNode, 0))
             print('---')
         # if(self.steps < 25):
         #     self.steps += 1
