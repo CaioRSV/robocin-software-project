@@ -15,8 +15,7 @@ class ExampleAgent(BaseAgent):
         self.visitedNodes = [];
     
         self.test = Point(0,0);
-
-
+    
     def decision(self):
         if len(self.targets) == 0:
             return 
@@ -117,6 +116,9 @@ class ExampleAgent(BaseAgent):
 
             self.visitedNodes = newVisitedNodes
 
+            # Getting list of neighbours that have opponents on them
+            self.field
+
             # Adding all neighbours to the priorityQueue
             neighbourNodes = []
             for i in neighbourPoints:
@@ -180,6 +182,8 @@ class ExampleAgent(BaseAgent):
             
             print(f"Target: {targetNode[0]} | Currently Going: {chosenPoint}")
             #print('---') 
+
+        print('-')
 
         target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.test)
         self.set_vel(target_velocity)
