@@ -15,6 +15,7 @@ class ExampleAgent(BaseAgent):
         self.visitedNodes = [];
     
         self.test = Point(0,0);
+        self.obstaclePoints = [];
     
     def decision(self):
         if len(self.targets) == 0:
@@ -76,6 +77,13 @@ class ExampleAgent(BaseAgent):
 
         self.priorityQueue.append(currentNode) # Point, f(0), Parent
 
+
+        # Defining current other agent points
+        currOpPoints = list(map(lambda op: Point(self.opponents[op].x, self.opponents[op].y), self.opponents))
+        currTeamPoints = list(map(lambda op: Point(self.teammates[op].x, self.teammates[op].y), self.teammates))
+
+        self.obstaclePoints = currOpPoints + currTeamPoints;
+
         #print(f"Pos: {planePos} | Target: {targetPos}")
 
         def RecursiveStep(currentNode, targetNode, depth):
@@ -125,7 +133,13 @@ class ExampleAgent(BaseAgent):
                 for n in self.nodes:
                     if (i[0].x == n.x and i[0].y == n.y):
                         curPoint = Point(n.x, n.y)
-                        neighbourNodes.append([curPoint, curPoint.dist_to(targetNode[0]), currentNode[0]])
+                        obstaclePenalty = 0;
+                        for obstacle in self.obstaclePoints:
+                            distanceObs= curPoint.dist_to(Point(obstacle.x, obstacle.y))
+                            naoRelaDistance = (self.field.rbt_radius*16)
+                            if (distanceObs < naoRelaDistance):
+                                obstaclePenalty += 25
+                        neighbourNodes.append([curPoint, curPoint.dist_to(targetNode[0])+obstaclePenalty, currentNode[0]])
             
             for i in neighbourNodes:
                 self.priorityQueue.append(i)
@@ -150,7 +164,7 @@ class ExampleAgent(BaseAgent):
         if (self.steps == 0):
             self.test = chosenPoint
 
-        if(self.steps < 25):
+        if(self.steps < 2):
             self.steps += 1
         else:
             self.steps = 0
@@ -175,10 +189,10 @@ class ExampleAgent(BaseAgent):
             print('---')
             #print(pathList)
 
-            if(len(pathList) > 2):
-                self.test = pathList[(len(pathList)-2)]
-            elif(len(pathList) == 2):
-                self.test = pathList[0]
+            if len(pathList) >= 3:
+                self.test = pathList[-3]  # Third item from the end
+            else:
+                self.test = pathList[-2]  # Second-to-last item (if list has at least 2 items)
             
             print(f"Target: {targetNode[0]} | Currently Going: {chosenPoint}")
             #print('---') 
@@ -188,7 +202,7 @@ class ExampleAgent(BaseAgent):
         target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.test)
         self.set_vel(target_velocity)
         self.set_angle_vel(target_angle_velocity)
-
+        
         return
 
     def post_decision(self):
