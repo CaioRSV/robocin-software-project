@@ -11,8 +11,10 @@ class ExampleAgent(BaseAgent):
         self.steps = 0;
     
         self.nodes = []; # [Point, f(n), ParentNode]
-        self.priorityQueue = [[Point(99,99), 100, None]];
+        self.priorityQueue = [];
         self.visitedNodes = [];
+    
+        self.test = Point(0,0);
 
 
     def decision(self):
@@ -27,7 +29,7 @@ class ExampleAgent(BaseAgent):
 
         self.nodes = [] # Point, f(n), Parent
 
-        gap =  self.field.rbt_radius or 0.05  # Gap arbitrário (para testar, 1 é bom de visualizar)
+        gap = self.field.rbt_radius or 0.05  # Gap arbitrário (para testar, 1 é bom de visualizar)
 
         height = self.field.length  # For example, 4.0
         width = self.field.width    # For example, 6.0
@@ -46,7 +48,7 @@ class ExampleAgent(BaseAgent):
                 x += gap
             y += gap
 
-        print('-------');
+        #print('-------');
         #print(len(self.nodes));
 
 
@@ -99,7 +101,7 @@ class ExampleAgent(BaseAgent):
             # print(f"Posição no plano de nodes: {currentNode[0]}")
                     
             # Popping currentNode from the Priority Queue
-            self.priorityQueue = [i for i in self.priorityQueue if i!=currentNode[0]]
+            self.priorityQueue = [i for i in self.priorityQueue if i[0]!=currentNode[0]]
 
             # Visited Nodes Handling
             newVisitedNodes = []
@@ -128,28 +130,58 @@ class ExampleAgent(BaseAgent):
 
             # Choosing next node based on less f(n)
             nextNode = min(self.priorityQueue, key= lambda x: x[1])
-
+            
+            #print(f"Analyzing: {currentNode}...")
             # Target checking
-            if(nextNode[0] == targetNode[0] or depth>20):
+            if(nextNode[0] == targetNode[0] or depth<999): # Python Depth
                 self.visitedNodes.append(nextNode)
-                print("RESULTs:")
-                #print(self.priorityQueue)
-                print(self.visitedNodes)
-                return nextNode
+                # print('-')
+                # print(f"LastPos: {currentNode} | Target: {targetNode}")
+                # print(f"Próximo Node para ir para Target: {nextNode}")
+                # print(self.priorityQueue)
+                # print(self.visitedNodes)
+
+                # print(f"FOUND THE FINAL NODE! {nextNode}")
             else:
                 RecursiveStep(nextNode, targetNode, depth+1)
 
-        if (self.steps < 1) :
-            print(len(self.priorityQueue))
-            print(RecursiveStep(currentNode, targetNode, 0))
-            print('---')
-        # if(self.steps < 25):
-        #     self.steps += 1
-        # else:
-        #     print(self.steps)
-        #     self.steps = 0        
+        if (self.steps == 0):
+            self.test = chosenPoint
 
-        target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, chosenPoint)
+        if(self.steps < 25):
+            self.steps += 1
+        else:
+            self.steps = 0
+
+            self.priorityQueue = [currentNode]
+            self.visitedNodes = []
+
+            #print(currentNode)
+            #print(len(self.nodes))
+            RecursiveStep(currentNode, targetNode, 0)
+
+            pathList = []
+            currNode = self.visitedNodes[len(self.visitedNodes)-1]
+            parent = "Start"
+
+            while parent != None:
+                pathList.append(currNode[0])
+                parent = currNode[2]
+                parentNodeList = [node for node in self.visitedNodes if node[0] == parent]
+                if(len(parentNodeList)>0):
+                    currNode = parentNodeList[0]
+            print('---')
+            #print(pathList)
+
+            if(len(pathList) > 2):
+                self.test = pathList[(len(pathList)-2)]
+            elif(len(pathList) == 2):
+                self.test = pathList[0]
+            
+            print(f"Target: {targetNode[0]} | Currently Going: {chosenPoint}")
+            #print('---') 
+
+        target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.test)
         self.set_vel(target_velocity)
         self.set_angle_vel(target_angle_velocity)
 

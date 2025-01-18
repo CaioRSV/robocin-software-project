@@ -169,7 +169,16 @@ class SSLExampleEnv(SSLBaseEnv):
             )
 
         super()._render()
-        
+
+        for dudeNumber in self.my_agents:
+            self.draw_target(
+                self.window_surface,
+                pos_transform,
+                Point(self.my_agents[dudeNumber].test.x, self.my_agents[dudeNumber].test.y),
+                (255, 255, 255),
+            )
+            #pygame.draw.lines(self.window_surface, (255, 0, 255), False, [self.my_agents[dudeNumber].pos, self.my_agents[dudeNumber].test], 3)
+
         for target in self.targets:
             self.draw_target(
                 self.window_surface,
